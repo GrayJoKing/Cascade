@@ -79,7 +79,7 @@ multi sub exec(Int @x, Int:D $y) returns Array[Int] { 				# Execute a function a
 }
 
 sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
-	my &unary	= -> &f {&{f exec $x,$y+1}};						# A unary function that applies a function to the below coordinate
+	my &unary	= -> &f {&{f exec $x, $y+1}};						# A unary function that applies a function to the below coordinate
 	my &binary  = -> &f {&{f |exec Array[Int]($x-1, $x+1), $y+1}};	# A binary function that applies a function to the two below coordinates
 	
 	@start.push(Array[Int]([$x, $y])) if $c eq '@';
@@ -107,10 +107,10 @@ sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
 		when '|'	{&{exec $x, $y+1}}
 		when '!'	{&{exec $x, $y+2}}
 		when '^'	{binary {$^a;$^b}}
-		when '$'	{&{exec($x+[-1,1].pick, $y+1)}}
+		when '$'	{&{exec($x+[-1, 1].pick, $y+1)}}
 		
 		# Conditionals
-		when '?'	{&{exec $x+(exec($x, $y+1)>0)*2-1,$y+1}}
+		when '?'	{&{exec $x+(exec($x, $y+1)>0)*2-1, $y+1}}
 		when '_'	{&{exec($x-1, $y+1) && exec($x+1, $y+1)}}
 		
 		# IO
@@ -120,7 +120,7 @@ sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
 		when '#'	{unary {print +$_;$_}}
 		when '"'	{&{
 			+(while (my $c = getCodeChar $x, $y + ++$) ne '"' {
-				print $c ~~ /<[\w]-[_]>/ ?? chr getV $c !! $c;
+				print chr getV $c;
 			})
 		}}
 		when ';'	{&isEOF}
@@ -146,7 +146,7 @@ multi sub MAIN (Str:D $file where *.IO.f) {
 	
 	my Str:D $content = slurp $file;
 	
-	@codeContent = $content.lines.map:{my Char @ is default(" ") = .comb}
+	@codeContent = $content.split("\n").map:{my Char @ is default(" ") = .comb}
 	
 	for ^@codeContent -> $y {
 		@code[$y] = my Callable @ is default(&{0}) = Array[Callable].new();
