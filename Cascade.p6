@@ -16,7 +16,7 @@ sub height returns Int {
 }
 
 sub getV(Char:D $_) returns Int {
-	return %variables{$_} ?? %variables{$_}[*-1] !! /\d/ ?? .unival !! .ord
+	return %variables{$_} ?? %variables{$_}[*-1] !! /<:N>/ ?? .unival !! .ord
 }
 
 sub popV(Char:D $s) returns Int {
@@ -43,13 +43,13 @@ sub getTempChar returns Char {
 sub getIntInput returns Int {
 	my Bool:D $negative = False;
 	
-	$negative = '-' eq getChar() while !isEOF() && getTempChar() ~~ !/\d/;
+	$negative = '-' eq getChar() while !isEOF() && getTempChar() ~~ !/<:N>/;
 
 	return 0 if isEOF;
 
 	my Int:D $d = unival getChar;
 	
-	$d = $d*10 + getChar.unival while !isEOF() && getTempChar() ~~ /\d/;
+	$d = $d*10 + getChar.unival while !isEOF() && getTempChar() ~~ /<:N>/;
 	$d = -$d if $negative;
 	
 	return $d

@@ -77,7 +77,7 @@ a|b
 
 ### Variables:
 
-Variables in **Cascade** are any digits or letters, and by default have the value that makes sense. For example, `1` has a value of `1`, and `a` has a value of `97` (the ordinal value of `a`). 
+Variables are any numeric characters or letters, and by default have the value that makes sense. For example, `1` has a value of `1`, and `a` has a value of `97` (the ordinal value of `a`). 
 
 ~~~
  @
@@ -96,7 +96,7 @@ But secretly, each variable is actually a stack of values, and using a variable 
     1
 ~~~
 
-### Full List of Instructions
+### Instruction List
 
 | Group | Character(s) | Name | Action |
 |-|-|-|-|
@@ -132,7 +132,7 @@ But secretly, each variable is actually a stack of values, and using a variable 
 |              | `"` | String Output | Prints each variable below it until it encounters another `"` |
 |              | `;` | EOF           | Returns 1 if there is no more input left, otherwise 0 |
 | Meta | | | |
-|      | digits  | Variables | Returns the top of the stack for that variable, otherwise the value of the digit |
+|      | numeric | Variables | Returns the top of the stack for that variable, otherwise the numeric value of the character |
 |      | letters | Variables | Returns the top of the stack for that variable, otherwise the ordinal value of that character |
 |      | `[`     | Pop       | Pop from the variable at the character below this one and return |
 |      | `]`     | Push      | Push to the character at left the value of right, then return right |
@@ -145,6 +145,6 @@ But secretly, each variable is actually a stack of values, and using a variable 
 ### Notes:
 
 * Variables don't necessarily have to be ASCII
-  * They can even be normally instructions, if the command is getting the variable by character
+  * They can even be the same character as instructions, if the command is getting the variable by character
 * The get/put commands wrap around the boundary of the program
-* This language isn't intended to be a Turing Tarpit (something hard to even *program* in), but it *is* meant to be interesting to golf in (finding the shortest program to execute a task), since this result in overlapping logic in a lot of places.
+* This language isn't intended to be a Turing Tarpit (something hard to even *program* in), but it *is* meant to be interesting to golf in (finding the shortest program to execute a task), since this results in overlapping logic in a lot of places.
