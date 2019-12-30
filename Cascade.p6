@@ -37,13 +37,13 @@ sub getChar returns Char {
 }
 
 sub getTempChar returns Char {
-	return $buffer = getChar
+	return ($buffer = getChar)//"\0"
 }
 
 sub getIntInput returns Int {
 	my Bool:D $negative = False;
-	
-	$negative = '-' eq getChar() while !isEOF() && getTempChar() ~~ !/<:N>/;
+
+	$negative = '-'.ord eq getCharInput() while !isEOF() && getTempChar() ~~ !/<:N>/;
 
 	return 0 if isEOF;
 
@@ -89,7 +89,7 @@ sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
 		when '+'	{binary &[+]}
 		when '-'	{binary &[-]}
 		when '*'	{binary &[*]}
-		when ':'	{binary &[div]}
+		when ':'	{binary {$^b ?? $^a div $b !! die "Division by zero"}}
 		when '%'	{binary &[mod]}
 		when '('	{unary *-1}
 		when ')'	{unary *+1}
@@ -115,7 +115,7 @@ sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
 		
 		# IO
 		when ','	{&getCharInput}
-		when '.'	{unary {print .chr;$_}}
+		when '.'	{unary {die "Attempted to print $_ as character" if !(0 <= $_ <= 0x10FFFF);print .chr;$_}}
 		when '&'	{&getIntInput}
 		when '#'	{unary {print +$_;$_}}
 		when '"'	{&{
@@ -142,9 +142,21 @@ sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
 	}
 }
 
-multi sub MAIN (Str:D $file where *.IO.f) {
+my %*SUB-MAIN-OPTS = :named-anywhere;
+
+multi sub MAIN (Str:D $file where *.IO.f, Bool :e(:$evaluate) = False) {
+	
+	$*OUT.out-buffer = 0;
 	
 	my Str:D $content = slurp $file;
+	
+	die "Program cannot be empty" if !$content;
+	
+	CATCH {
+		default {
+			note .message
+		}
+	}
 	
 	@codeContent = $content.split("\n").map:{my Char @ is default(" ") = .comb}
 	
@@ -155,11 +167,55 @@ multi sub MAIN (Str:D $file where *.IO.f) {
 		}
 	}
 
-	if @start {
-		for @start {
-			exec |$_
-		}
-	} else {
-		exec 0, 0
+	if !@start {
+		@start.push(Array[Int]([0, 0]));
+	}
+	for @start {
+		(.say if $evaluate) given exec |$_;
 	}
 }
+
+
+multi sub MAIN (Str:D $file where *.IO.f, Bool :s(:$structure) = False) {
+	my Str:D $content = slurp $file;
+	
+	die "Program cannot be empty" if !$content;
+	CATCH {
+		default {
+			note .message
+		}
+	}
+	
+	@codeContent = $content.split("\n").map:{my Char @ is default(" ") = .comb}
+	
+	my @seps = [" " xx 2*width()+1] xx height();
+	
+	for ^@codeContent -> $y {
+		for ^width() -> $x {
+			my &replace = {
+				@seps[$y][$x*2] = @seps[$y][$x*2] eq '\\' ?? 'X' !! '/'
+			}
+			my &checkSkip = {
+				@seps[$y][$x*2+1] eq "⊤" ?? $_ eq "|" ?? '+' !! "⊤" !! $_
+			}
+			@seps[$y;$x*2+1, $x*2+2] = @codeContent[$y;$x].&{
+				when '/' { &replace();&checkSkip(" "), " "}
+				when '\\' {&checkSkip(" "), '\\'}
+				when '!' {@seps[$y+1][$x*2+1] = "⊤";@seps[$y][$x*2+1] eq "⊤" ?? "I" !! "⊥", ' '}
+				when /<[+\-*:%=<>^$_\{[\]]>/ {&replace(); &checkSkip(" "), '\\'}
+				when /<[()~@|.#']>/ {&checkSkip('|'), ' '}
+				when /<[?}]>/ {&replace(); &checkSkip("|"), '\\'}
+				default {&checkSkip(" "), " "}
+			}
+		}
+		@seps[$y][0] = (@seps[$y][*-1] = @seps[$y][0] eq "/" && @seps[$y][*-1] eq "\\" ?? "X" !! sort(@seps[$y;0,*-1])[1]);
+	}
+	say @seps[*-1].join;
+	
+	for ^@codeContent -> $y {
+		say " "~@codeContent[$y].join(" ");
+		say @seps[$y].join;
+	}
+	
+}
+

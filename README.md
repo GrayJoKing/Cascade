@@ -104,7 +104,7 @@ But secretly, each variable is actually a stack of values, and using a variable 
 |              | `@`  | Start     | Returns center. Execution starts here. If there are multiple `@`s, then run them all in sequence, going from top to bottom, left to right. If there are none, start at the top left cell |
 |              | `/`  | Left      | Returns left                      |
 |              | `\`  | Right     | Returns right                     |
-|              | `\|` | Center    | Returns center                     |
+|              | `\|` | Center    | Returns center                    |
 |              | `!`  | Skip      | Returns two below by skipping the one between |
 |              | `^`  | Both      | Execute left, but return right    |
 | Branching | | | |
@@ -148,3 +148,4 @@ But secretly, each variable is actually a stack of values, and using a variable 
   * They can even be the same character as instructions, if the command is getting the variable by character
 * The get/put commands wrap around the boundary of the program
 * This language isn't intended to be a Turing Tarpit (something hard to even *program* in), but it *is* meant to be interesting to golf in (finding the shortest program to execute a task), since this results in overlapping logic in a lot of places.
+* I've added the `-s` flag, which will print out a structure of a program with extra lines showing the control flow of each instruction.
