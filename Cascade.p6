@@ -130,8 +130,8 @@ sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
 		when '{'	{binary &ord o &getCodeChar}
 		when '}'	{binary {
 			@codeContent[$^b % height;$^a % width] = chr exec $x, $y+1;
-			parseCode $a, $b, getCodeChar $a, $b;
-			ord getCodeChar $^a, $^b
+			parseCode $a % width, $b % height, getCodeChar $a, $b;
+			ord getCodeChar $a, $b
 		}}
 		when "'"	{&{ord getCodeChar $x, $y+1}}
 		
