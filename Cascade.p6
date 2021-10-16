@@ -119,7 +119,8 @@ sub parseCode(Int:D $x, Int:D $y, Char:D $c) {
 		when '&'	{&getIntInput}
 		when '#'	{unary {print +$_;$_}}
 		when '"'	{&{
-			+(while (my $c = getCodeChar $x, $y + ++$) ne '"' {
+			my $n = 0;
+			+(while (my $c = getCodeChar $x, $y + ++$n) ne '"' {
 				print chr getV $c;
 			})
 		}}
